@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>函數圖形繪製</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            background-image:url('背景.jpg');
+            background-repeat: no-repeat;
+            background-attachment:fixed;
+            background-size:cover;
+            background-position:center center;/*將圖片置中*/
+            display:fiex;/*設為隨網頁縮放的模式*/
+            margin:0 auto;/*設定外邊距 */
+        }
+        canvas {
+            border: 1px solid black;
+            background-color: #ffffff;
+        }
+        .controls {
+            margin: 20px;
+        }
+        .controls input {
+            width: 300px;
+            padding: 10px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        .controls button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        h1{
+            color: #ffffff;
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <h1>函數圖形繪製器</h1>
+        <input type="text" id="functionInput" placeholder="請輸入函數，例如: x*x 或 Math.sin(x)">
+        <button onclick="drawFunction()">開始繪製圖形</button>
+    </div>
+    <canvas id="canvas" width="800" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        const scale = 40; // 坐標系的縮放比例
+        const origin = { x: width / 2, y: height / 2 }; // 坐標系的原點
+
+        // 繪製坐標系
+        function drawAxes() {
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 1;
+
+            // 繪製x軸
+            ctx.beginPath();
+            ctx.moveTo(0, origin.y);
+            ctx.lineTo(width, origin.y);
+            ctx.stroke();
+
+            // 繪製y軸
+            ctx.beginPath();
+            ctx.moveTo(origin.x, 0);
+            ctx.lineTo(origin.x, height);
+            ctx.stroke();
+
+            // 繪製刻度
+            for (let i = -width / 2; i <= width / 2; i += scale) {
+                ctx.beginPath();
+                ctx.moveTo(origin.x + i, origin.y - 5);
+                ctx.lineTo(origin.x + i, origin.y + 5);
+                ctx.stroke();
+            }
+
+            for (let i = -height / 2; i <= height / 2; i += scale) {
+                ctx.beginPath();
+                ctx.moveTo(origin.x - 5, origin.y + i);
+                ctx.lineTo(origin.x + 5, origin.y + i);
+                ctx.stroke();
+            }
+        }
+
+        // 繪製函數圖形
+        function drawFunction() {
+            const functionInput = document.getElementById('functionInput').value;
+            const func = new Function('x', `return ${functionInput}`);
+
+            ctx.clearRect(0, 0, width, height);
+            drawAxes();
+
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 2;
+
+            ctx.beginPath();
+            for (let x = -width / 2; x <= width / 2; x++) {
+                const canvasX = origin.x + x;
+                const funcX = x / scale;
+                let funcY;
+
+                try {
+                    funcY = func(funcX);
+                } catch (e) {
+                    funcY = NaN;
+                }
+
+                const canvasY = origin.y - funcY * scale;
+
+                if (x === -width / 2) {
+                    ctx.moveTo(canvasX, canvasY);
+                } else {
+                    ctx.lineTo(canvasX, canvasY);
+                }
+            }
+            ctx.stroke();
+        }
+
+        drawAxes();
+    </script>
+</body>
+</html>
